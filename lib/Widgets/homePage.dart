@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 
-import 'Widgets/new_transaction.dart';
-import 'Widgets/transaction_list.dart';
-import 'Widgets/chart.dart';
-import 'models/transaction.dart';
+import 'new_transaction.dart';
+import 'transaction_list.dart';
+import 'chart.dart';
+import '../models/transaction.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
         '================Length: ${Hive.box('transactions').length}=============');
   }
 
+  // TODO: Implement Edit Transaction Option
   // void _editTransacion(int index, String title, double amount, DateTime date) {
   //   setState(() {
   //     Hive.box('transactions').putAt(
@@ -81,6 +82,44 @@ class _MyHomePageState extends State<MyHomePage> {
   //     );
   //   });
   // }
+
+  List<Widget> _buildLandscapeContent(MediaQueryData screen,
+      PreferredSizeWidget appBar, BuildContext context, Widget txListWidget) {
+    return [
+      Container(
+        height: (screen.size.height -
+                appBar.preferredSize.height -
+                screen.padding.top) *
+            0.1,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Show Chart',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            //Switch.adaptive adapts the switch as per android or IOS
+            Switch.adaptive(
+                value: _showChart,
+                onChanged: (val) {
+                  setState(() {
+                    _showChart = val;
+                  });
+                })
+          ],
+        ),
+      ),
+      _showChart
+          ? Container(
+              height: (screen.size.height -
+                      appBar.preferredSize.height -
+                      screen.padding.top) *
+                  0.75,
+              child: Chart(_recentTransactions),
+            )
+          : txListWidget
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,50 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           //Weekly Expense measure bar container
           children: [
+            if (!isLandscape) ..._buildPortraitContent(screen, appBar, txList),
             if (isLandscape)
-              Container(
-                height: (screen.size.height -
-                        appBar.preferredSize.height -
-                        screen.padding.top) *
-                    0.1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Show Chart',
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                    //Switch.adaptive adapts the switch as per android or IOS
-                    Switch.adaptive(
-                        value: _showChart,
-                        onChanged: (val) {
-                          setState(() {
-                            _showChart = val;
-                          });
-                        })
-                  ],
-                ),
-              ),
-            //Chart showing last 7 day stats
-            if (!isLandscape)
-              Container(
-                height: (screen.size.height -
-                        appBar.preferredSize.height -
-                        screen.padding.top) *
-                    0.3,
-                child: Chart(_recentTransactions),
-              ),
-            if (!isLandscape) txList,
-            if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (screen.size.height -
-                              appBar.preferredSize.height -
-                              screen.padding.top) *
-                          0.75,
-                      child: Chart(_recentTransactions),
-                    )
-                  : txList,
+              ..._buildLandscapeContent(screen, appBar, context, txList),
           ],
         ),
       ),
@@ -194,6 +192,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () => _startAddNewTransaction(context),
                   ),
           );
+  }
+
+  List<Widget> _buildPortraitContent(
+      MediaQueryData screen, PreferredSizeWidget appBar, Widget txListWidget) {
+    return [
+      Container(
+        height: (screen.size.height -
+                appBar.preferredSize.height -
+                screen.padding.top) *
+            0.3,
+        child: Chart(_recentTransactions),
+      ),
+      txListWidget
+    ];
   }
 
   @override
