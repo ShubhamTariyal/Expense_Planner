@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 
-import 'new_transaction.dart';
-import 'transaction_list.dart';
-import 'chart.dart';
+import '../Widgets/new_transaction.dart';
+import '../Widgets/transaction_list.dart';
+import '../Widgets/chart.dart';
 import '../models/transaction.dart';
 
 class MyHomePage extends StatefulWidget {
